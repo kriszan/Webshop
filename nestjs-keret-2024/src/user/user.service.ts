@@ -1,18 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './user.schema';
-
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 @Injectable()
 export class UserService {
-  // Assuming you're using some ORM like TypeORM or Mongoose
   async findOne(id: string) {
-    return User.findById(id);
+    return prisma.user.findUnique({ where: { id: parseInt(id) } });
   }
 
   async updateName(id: string, name: string) {
-    return User.findByIdAndUpdate(id, { name });
+    return prisma.user.update({ where: { id: parseInt(id) }, data: { name } });
   }
 
   async updatePassword(id: string, password: string) {
-    return User.findByIdAndUpdate(id, { password });
+    return prisma.user.update({
+      where: { id: parseInt(id) },
+      data: { password },
+    });
   }
 }

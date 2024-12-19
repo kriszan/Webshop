@@ -1,17 +1,24 @@
+// src/products/products.service.ts
 import { Injectable } from '@nestjs/common';
-import { Product } from './products.model';
+import { PrismaService } from '../prisma.service';
+import { Product } from '@prisma/client'; // Import Product type
 
 @Injectable()
 export class ProductsService {
-  private readonly products: Product[] = [
-    { id: 1, name: 'Product 1', price: 100, description: 'Description 1' },
-    { id: 2, name: 'Product 2', price: 200, description: 'Description 2' },
-    // Add more mock products as needed
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.products;
+  // Fetch all products
+  async getProducts(): Promise<Product[]> {
+    return await this.prisma.product.findMany();
   }
 
-  // Additional methods for sorting, searching, etc.
+  // Add a product to the cart (example)
+  async addToCart(productId: number, userId: number) {
+    // Implement adding to cart logic
+  }
+
+  // Delete product
+  async deleteProduct(productId: number): Promise<void> {
+    await this.prisma.product.delete({ where: { id: productId } });
+  }
 }

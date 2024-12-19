@@ -1,35 +1,43 @@
+// src/auth/auth.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User } from './user.schema';
+import { PrismaService } from '../prisma.service'; // Import PrismaService
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    private prisma: PrismaService,  // Inject PrismaService
     private jwtService: JwtService,
   ) {}
 
   async register(email: string, password: string, name: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new this.userModel({ email, password: hashedPassword, name });
-    return await user.save();
+
+    // Use Prisma to create a user in the database
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+      },
+    });
+
+    return user;
   }
 
   async login(email: string, password: string) {
-    const user = await this.userModel.findOne({ email });
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
     if (!user) throw new Error('Invalid credentials');
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error('Invalid credentials');
-    
-    const payload = { email: user.email, id: user._id };
+
+    const payload = { email: user.email, id: user.id };
+
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
-
-  // Add more helper functions like validating JWT, etc.
 }

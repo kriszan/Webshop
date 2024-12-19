@@ -6,8 +6,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('search') search: string, @Query('sort') sort: string) {
-    let products = this.productsService.findAll();
+  async findAll(@Query('search') search: string, @Query('sort') sort: string) {
+    let products = await this.productsService.getProducts();
 
     // Handle sorting, searching, and pagination here
     if (search) {

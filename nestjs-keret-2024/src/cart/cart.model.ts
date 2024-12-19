@@ -1,3 +1,5 @@
+import { User, Product } from "@prisma/client";
+
 export interface Cart {
   id: number;
   userId: number; // User who added the product to the cart
